@@ -22,7 +22,8 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link active" href="Page1.html">Home <span class="sr-only">(current)</span></a>
         <a class="nav-item nav-link" href="Page2.html">Our Team</a>
-        <button class="btn btn-danger" id="btnLogout">Logout</button>
+        <a class="btn btn-danger" id="btnLogout" href="api/logout">Logout</a>
+        <button class="btn btn-secondary" id="btnDelte" href="api/user/delete">Delete Account</button>
       </div>
     </div>
   </nav>
@@ -44,9 +45,42 @@
                     </div>
                   </div>
               </div>
-              
           </div>
       </div>
+      <div class="row">
+          <div class="col p-3">
+            <div class="bg-light rounded p-2">
+                <h3>Βαθμολόγιση ταινίας</h3>
+                <label for="title1">Τίτλος ταινίας</label>
+                <input class="form-control" type="text" id="title1" name="title1" value="">
+                <label for="rating">Βαθμός</label>
+                <input class="form-control" type="number" id="rating" name="rating" min="0" max="5">
+                <div class="row">
+                    <div class="col" id="divRatings"></div>
+                </div>
+                <button class="btn btn-primary mt-2" id="btnRateShow">Εμφάνιση βαθμολογιώς</button>
+                <button class="btn btn-warning mt-2" id="btnRate">Βαθμολόγιση</button>
+                <button class="btn btn-danger mt-2" id="btnRateDelete">Αφαίρεση βαθμολογίας</button>
+          </div>
+          </div>
+      </div>
+      <div class="row">
+        <div class="col p-3">
+          <div class="bg-light rounded p-2">
+              <h3>Σχολιασμός ταινίας</h3>
+              <label for="title2">Τίτλος ταινίας</label>
+              <input class="form-control" type="text" id="title2" name="title2" value="">
+              <label for="comment">Σχόλιο</label>
+              <input class="form-control" type="text" id="comment" name="comment">
+              <div class="row">
+                  <div class="col" id="divComments"></div>
+              </div>
+              <button class="btn btn-primary mt-2" id="btnCommentShow">Εμφάνιση σχολίων</button>
+              <button class="btn btn-warning mt-2" id="btnCommentAdd">Σχολιασμός</button>
+              <button class="btn btn-danger mt-2" id="btnCommentDelete">Διαγραφή σχολίου</button>
+        </div>
+        </div>
+    </div>
   </div>
 </body>
 
@@ -117,6 +151,116 @@ $("#btnSearch").click(function(){
         error:function (request, status){
             alert("Error: "+request.responseJSON.info);
             $('#divMovies').html();
+        }
+    });
+});
+//Show ratings for a movie
+$("#btnRateShow").click(function(){
+    $.ajax({
+        url: "/api/user/data",
+        type: "GET",
+        dataType: "json",       
+        success:function(data, xhr){
+            console.log(data);
+            var ratings = data.ratings
+            var html_to_append = '<div class="row m-3 bg-white">';
+            for(var j=0; j < ratings.length; j++){
+                console.log(ratings[j]);
+                for(key in ratings[j]){
+                   html_to_append += key+': '+ratings[j][key]+'</br>';
+                }
+            }
+            html_to_append += '</div>';
+            $('#divRatings').html(html_to_append);
+
+        },
+        error:function (request, status){
+            alert("Error: "+request.responseJSON.info);
+        }
+    });
+});
+//Add rating
+$("#btnRate").click(function(){
+    $.ajax({
+        url: "/api/movie/add_rating",
+        data:{title: $("#title1").val(), rating: $("#rating").val()},
+        type: "POST",
+        dataType: "json",       
+        success:function(data, xhr){
+            alert('Rating added!');
+        },
+        error:function (request, status){
+            alert("Error: "+request.responseJSON.info);
+        }
+    });
+});
+//Delete a rating
+$("#btnRateDelete").click(function(){
+    $.ajax({
+        url: "/api/movie/delete_rating",
+        data:{title: $("#title1").val()},
+        type: "DELETE",
+        dataType: "json",       
+        success:function(data, xhr){
+            alert('Rating deleted!');
+        },
+        error:function (request, status){
+            alert("Error: "+request.responseJSON.info);
+        }
+    });
+});
+//Show comments for a movie
+$("#btnCommentShow").click(function(){
+    $.ajax({
+        url: "/api/user/data",
+        type: "GET",
+        dataType: "json",       
+        success:function(data, xhr){
+            console.log(data);
+            var comments = data.comments
+            var html_to_append = '<div class="row m-3 bg-white">';
+            for(var j=0; j < comments.length; j++){
+                console.log(comments[j]);
+                for(key in comments[j]){
+                   html_to_append += key+': '+comments[j][key]+'</br>';
+                }
+            }
+            html_to_append += '</div>';
+            $('#divComments').html(html_to_append);
+
+        },
+        error:function (request, status){
+            alert("Error: "+request.responseJSON.info);
+        }
+    });
+});
+//Add comment
+$("#btnCommentAdd").click(function(){
+    $.ajax({
+        url: "/api/movie/add_comment",
+        data:{title: $("#title2").val(), comment: $("#comment").val()},
+        type: "POST",
+        dataType: "json",       
+        success:function(data, xhr){
+            alert('Comment added!');
+        },
+        error:function (request, status){
+            alert("Error: "+request.responseJSON.info);
+        }
+    });
+});
+//Delete comment
+$("#btnCommentDelete").click(function(){
+    $.ajax({
+        url: "/api/movie/delete_comment",
+        data:{title: $("#title2").val(), comment: $("#comment").val()},
+        type: "DELETE",
+        dataType: "json",       
+        success:function(data, xhr){
+            alert('Comment Deleted!');
+        },
+        error:function (request, status){
+            alert("Error: "+request.responseJSON.info);
         }
     });
 });

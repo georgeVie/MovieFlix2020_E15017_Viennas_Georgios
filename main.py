@@ -11,7 +11,6 @@ usersCollection = db['Users']
 moviesCollection = db['Movies']
 
 app = Flask(__name__)
-#TODO Change category to none!!!!
 loggedUser = {'name':'none','pass':'none','email':'none','category':'none'}
 
 
@@ -22,9 +21,9 @@ Users & access controll V
 """
 @app.route('/api/register', methods=['POST'])
 def register_user():
-    name= request.args.get('name')
-    password= request.args.get('password')
-    email= request.args.get('email')
+    name = request.form['name']
+    email = request.form['email']
+    password = request.form['password']
 
     if name and password and email:
         exists = usersCollection.find_one({"email": email})
@@ -34,9 +33,7 @@ def register_user():
             return Response(js, status=405)
         else:
             if usersCollection.insert_one({'name':name, 'pass':password, 'email':email, 'category':'user'}):
-                data = {'info':'User has been added'}
-                js = json.dumps(data)
-                return Response(js, status=200)
+                return redirect(url_for('login'))
             else:
                 data = {'info':'Internal Server Error'}
                 js = json.dumps(data)
@@ -71,22 +68,18 @@ def login_user():
         return Response(js, status=404)
 
 
-@app.route('/api/logout',methods=['GET'])
+@app.route('/api/logout')
 def user_logout():
     global loggedUser
     loggedUser = {'name':'none','pass':'none','email':'none','category':'none'}
-    data = {'info':'Logged Out'}
-    js = json.dumps(data)
-    return Response(js, status=200)
+    return redirect(url_for('login'))
 
 @app.route('/api/user/delete',methods=['GET'])
 def delete_user():
     global loggedUser
     loggedUser = {'name':'none','pass':'none','email':'none','category':'none'}
     if usersCollection.delete_one({'email': loggedUser['email']}):
-        data = {'info':'Logged Out'}
-        js = json.dumps(data)
-        return Response(js, status=200)
+        return redirect(url_for('login'))
     else:
         return Response(json.dumps({'info':'Internal Server Error'}), status=500)
 
@@ -240,8 +233,8 @@ def movie_search():
 def add_rating():
     global loggedUser
     if loggedUser['category'] != 'none':
-        title = request.args.get('title')
-        rating = request.args.get('rating')
+        title = request.form['title']
+        rating = request.form['rating']
         if title and rating:
             if moviesCollection.update_one({'title': title}, {'$addToSet':{'ratings': {'email': loggedUser['email'], 'rating': int(rating)}}}):
                 if usersCollection.update_one({'email': loggedUser['email']}, {'$addToSet':{'ratings': {'title': title, 'rating': int(rating)}}}):
@@ -259,7 +252,7 @@ def add_rating():
 def delete_rating():
     global loggedUser
     if loggedUser['category'] != 'none':
-        title = request.args.get('title')
+        title = request.form['title']
         if title :
             if moviesCollection.update_one({'title': title}, {'$pull':{'ratings': {'email': loggedUser['email']}}}):
                 if usersCollection.update_one({'email': loggedUser['email']}, {'$pull':{'ratings': {'title': title}}}):
@@ -277,8 +270,8 @@ def delete_rating():
 def add_comment():
     global loggedUser
     if loggedUser['category'] != 'none':
-        title = request.args.get('title')
-        comment = request.args.get('comment')
+        title = request.form['title']
+        comment = request.form['comment']
         if title and comment:
             if moviesCollection.update_one({'title': title}, {'$addToSet':{'comments': {'email': loggedUser['email'], 'text': comment}}}):
                 if usersCollection.update_one({'email': loggedUser['email']}, {'$addToSet':{'comments': {'title': title, 'text': comment}}}):
@@ -296,17 +289,18 @@ def add_comment():
 def delete_comment():
     global loggedUser
     if loggedUser['category'] != 'none':
-        title = request.args.get('title')
-        if title :
-            if moviesCollection.update_one({'title': title}, {'$pull':{'comments': {'email': loggedUser['email']}}}):
-                if usersCollection.update_one({'email': loggedUser['email']}, {'$pull':{'comments': {'title': title}}}):
+        title = request.form['title']
+        comment = request.form['comment']
+        if title and comment:
+            if moviesCollection.update_one({'title': title}, {'$pull':{'comments': {'email': loggedUser['email'], 'text': comment}}}):
+                if usersCollection.update_one({'email': loggedUser['email']}, {'$pull':{'comments': {'title': title, 'text': comment}}}):
                     return Response(json.dumps({'info': 'Comment deleted!'}), status=200)
                 else:
                     return Response(json.dumps({'info':'Internal Server Error'}), status=500)
             else:
                 return Response(json.dumps({'info':'Internal Server Error'}), status=500)      
         else:
-            return Response(json.dumps({"info":"Provide a title"}), status=404)
+            return Response(json.dumps({"info":"Provide a title and a comment"}), status=404)
     else:
         return Response(json.dumps({"info":"Login in to view this page"}), status=403)
 
@@ -315,6 +309,7 @@ def delete_comment():
 def get_user_data():
     global loggedUser
     if loggedUser['category'] != 'none':
+        loggedUser = usersCollection.find_one({'email': loggedUser['email']})
         return Response(dumps(loggedUser), status=200)
     else:
         return Response(json.dumps({"info":"Login in to view this page"}), status=403)
@@ -331,9 +326,14 @@ def home():
         return redirect(url_for('login'))
     else:
         return render_template("index.html", loggedUser = loggedUser)
+
 @app.route('/login')
 def login():
     return render_template("login.html")
+
+@app.route('/register')
+def register():
+    return render_template("register.html")
 
 
 if __name__=='__main__':
