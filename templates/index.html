@@ -20,8 +20,10 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <a class="nav-item nav-link active" href="Page1.html">Home <span class="sr-only">(current)</span></a>
-        <a class="nav-item nav-link" href="Page2.html">Our Team</a>
+        <a class="nav-item nav-link active" href="/">Home <span class="sr-only">(current)</span></a>
+        {% if loggedUser.category == 'admin' %}
+            <a class="nav-item nav-link" href="/admin">Admin Dashboard</a>
+        {% endif %}
         <a class="btn btn-danger" id="btnLogout" href="api/logout">Logout</a>
         <button class="btn btn-secondary" id="btnDelte" href="api/user/delete">Delete Account</button>
       </div>
@@ -102,7 +104,7 @@ $("#btnSearch").click(function(){
                 html_to_append1 = '<div class="row m-3 bg-white">';
                 html_to_append2 = '';
                 for(key in data[i]){
-                    if(key == 'actors'){
+                    if(key == 'actors' || key == 'actor'){
                         html_to_append2 += '<div class="text-danger ml-3">actors:</br>'
                         var actors = data[i][key]
                         for(var j=0; j < actors.length; j++){

@@ -90,11 +90,11 @@ User controlls by ADMINS V
 
 """
 
-@app.route('/api/admin/change_category', methods=['POST'])
+@app.route('/api/admin/change_category', methods=['UPDATE'])
 def change_category():
     global loggedUser
     if loggedUser['category'] == 'admin':
-        email = request.args.get('email')
+        email = request.form['email']
         user = usersCollection.find_one({"email": email})
         if user:
             if usersCollection.update_one({'email': email}, {'$set':{'category': 'admin'}}):
@@ -110,7 +110,7 @@ def change_category():
 def admin_delete_user():
     global loggedUser
     if loggedUser['category'] == 'admin':
-        email = request.args.get('email')
+        email = request.form['email']
         user = usersCollection.find_one({"email": email})
         if user:
             if user['category'] == 'admin':
@@ -134,14 +134,19 @@ Movie controlls by ADMINS V
 def add_movie():
     global loggedUser
     if loggedUser['category'] == 'admin':
-        data = json.loads(request.data)
-        if data['title'] and data['actors']:
+        try:
+            data = json.loads(request.form['data'])
+        except:
+            return Response(json.dumps({'info':'Please provide at least a title and an actor(actors) in a json format'}), status=400)
+        if ("title" in data) and ("actors" in data):
+            if not("year" in data):
+                data["year"] = 0
             if moviesCollection.insert_one(data):
                 return Response(json.dumps({'info': 'Movie has been added!'}), status=200)
             else:
                 return Response(json.dumps({'info':'Internal Server Error'}), status=500)
         else:
-            return Response(json.dumps({'info':'Please provide at least a title and an actor'}), status=400)
+            return Response(json.dumps({'info':'Please provide at least a title and an actor(actors)'}), status=400)
     else:
         return Response(json.dumps({"info":"Only admins have access"}), status=403)
 
@@ -149,8 +154,7 @@ def add_movie():
 def delete_movie():
     global loggedUser
     if loggedUser['category'] == 'admin':
-        data = json.loads(request.data)
-        title = data['title']
+        title = request.form['title']
         if title:
             movie = moviesCollection.find_one({"year": {"$exists": "true"}, "$and": [{"title": title}]}, sort = [('year', 1)])
             print(movie)
@@ -167,11 +171,14 @@ def delete_movie():
         return Response(json.dumps({"info":"Only admins have access"}), status=403)
 #UPDATE a movie
 #Post request with a json containing all the values to be changed an a current-title (the movie to title we want to update)
-@app.route('/api/admin/update_movie', methods=['POST'])
+@app.route('/api/admin/update_movie', methods=['UPDATE'])
 def update_movie():
     global loggedUser
     if loggedUser['category'] == 'admin':
-        data = json.loads(request.data)
+        try:
+            data = json.loads(request.form['data'])
+        except:
+            return Response(json.dumps({'info':'Please provide at least a current-title'}), status=400)
         if data['current-title']:
             title = data['current-title']
             if moviesCollection.find_one({'title': title}):
@@ -183,7 +190,7 @@ def update_movie():
             else:
                 return Response(json.dumps({'info':f'There is no movie with the title {title}'}), status=404)  
         else:
-            return Response(json.dumps({'info':'Please provide at a current-title'}), status=400)
+            return Response(json.dumps({'info':'Please provide a current-title'}), status=400)
     else:
         return Response(json.dumps({"info":"Only admins have access"}), status=403)
 
@@ -191,10 +198,11 @@ def update_movie():
 def admin_delete_comment():
     global loggedUser
     if loggedUser['category'] == 'admin':
-        data = json.loads(request.data)
-        movie = moviesCollection.find_one({'title': data['title']})
-        if moviesCollection.update({'_id': movie['_id']}, {'$pull': {'comments':{'email': data['email']}}}) :
-            if usersCollection.update({'emial': data['email']}, {'$pull': {'comments':{'title': data['title']}}}):
+        title = request.form['title']
+        email = request.form['email']
+        movie = moviesCollection.find_one({'title': title})
+        if moviesCollection.update({'_id': movie['_id']}, {'$pull': {'comments':{'email': email}}}) :
+            if usersCollection.update({'email': email}, {'$pull': {'comments':{'title': title}}}):
                 return Response(json.dumps({'info': 'comment has been deleted!'}), status=200)
             else:
                 return Response(json.dumps({'info':'Internal Server Error'}), status=500)
@@ -334,6 +342,15 @@ def login():
 @app.route('/register')
 def register():
     return render_template("register.html")
+
+@app.route('/admin')
+def admin():
+    global loggedUser
+    if loggedUser['category'] == 'admin':
+        return render_template("dashboard.html")
+    else:
+        return redirect(url_for('home'))
+    
 
 
 if __name__=='__main__':
