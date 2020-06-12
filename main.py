@@ -11,7 +11,7 @@ usersCollection = db['Users']
 moviesCollection = db['Movies']
 
 app = Flask(__name__)
-#TODO Change category to none!!!!!!
+#TODO Change category to none!!!!
 loggedUser = {'name':'none','pass':'none','email':'none','category':'none'}
 
 
