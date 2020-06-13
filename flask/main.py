@@ -5,7 +5,8 @@ from pymongo import MongoClient
 from bson import Binary, Code
 from bson.json_util import dumps
 
-client = MongoClient('localhost:27017')
+#client = MongoClient('localhost:27017')
+client = MongoClient('mongodb', 27017)
 db = client['movieFlixDB']
 usersCollection = db['Users']
 moviesCollection = db['Movies']
