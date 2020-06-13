@@ -1,7 +1,7 @@
-FROM python:3
+FROM python:3.8.3-slim
 MAINTAINER Giorgos Viennas <viennas.g@gmail.com>
 
-RUN pip3 install flask pymongo
+RUN pip install flask pymongo
 RUN mkdir /app
 RUN mkdir -p /app/templates
 COPY main.py /app/main.py
