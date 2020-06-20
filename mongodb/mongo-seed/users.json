@@ -1,0 +1,7 @@
+[
+    {"email":"justin@admin.com","name":"Justin","pass":"1111","category":"admin","comments":[{"title":"Taken 2","text":"The best movie ever!!!!!!111"}],"ratings":[{"title":"Taken 2","rating":5}]},
+
+    {"email":"sam@user.com","name":"Sam","pass":"1234","category":"user","comments":[{"title":"Taken","text":"I hate it"}],"ratings":[{"title":"Taken","rating":4},{"title":"Taken 2","rating":5}]},
+
+    {"email":"nick@admin.com","name":"Nick","pass":"admin","category":"admin","comments":[{"title":"Taken","text":"Very nice movie!!!"},{"title":"Taken2","text":"Not so great but ok."}],"ratings":[{"title":"Taken","rating":5}]}
+]

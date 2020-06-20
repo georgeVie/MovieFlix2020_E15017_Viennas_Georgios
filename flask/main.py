@@ -230,7 +230,7 @@ def movie_search():
         elif year:
             movies = moviesCollection.find({'year': int(year)})
         elif actor:
-            movies = moviesCollection.find({'actors.name': {'$all': [actor]}})
+            movies = moviesCollection.find({'actors': {'$all': [actor]}})
         if movies != '' and movies.count() != 0:
             return Response(dumps(movies), status=200)
         else:

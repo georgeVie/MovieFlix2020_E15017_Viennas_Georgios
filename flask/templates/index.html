@@ -104,19 +104,7 @@ $("#btnSearch").click(function(){
                 html_to_append1 = '<div class="row m-3 bg-white">';
                 html_to_append2 = '';
                 for(key in data[i]){
-                    if(key == 'actors' || key == 'actor'){
-                        html_to_append2 += '<div class="text-danger ml-3">actors:</br>'
-                        var actors = data[i][key]
-                        for(var j=0; j < actors.length; j++){
-                            console.log(actors[j]);
-                            for(key1 in actors[j]){
-                                html_to_append2 += key1+': '+actors[j][key1]+'</br>'
-                            }
-                        }
-                        html_to_append2 += '</div>'
-                            
-                    }
-                    else if(key == 'comments'){
+                    if(key == 'comments'){
                         html_to_append2 += '<div class="text-info ml-3">comments:</br>'
                         var comments = data[i][key]
                         for(var j=0; j < comments.length; j++){
@@ -128,15 +116,15 @@ $("#btnSearch").click(function(){
                         html_to_append2 += '</div>'
                     }
                     else if(key == 'ratings'){
-                        html_to_append2 += '<div class="text-warning ml-3">ratings:</br>'
+                        html_to_append2 += '<div class="text-warning ml-3">rating:'
                         var ratings = data[i][key]
+                        var r = 0;
                         for(var j=0; j < ratings.length; j++){
                             console.log(ratings[j]);
-                            for(key1 in ratings[j]){
-                                html_to_append2 += key1+': '+ratings[j][key1]+'</br>'
-                            }
+                            r += ratings[j]['rating'];
                         }
-                        html_to_append2 += '</div>'
+                        r = r/ratings.length;
+                        html_to_append2 += r+'</br> by: '+ratings.length+' Users</div>'
                     }
                     else if(key != '_id'){
                         html_to_append1 += key+': '+data[i][key]+'</br>'
