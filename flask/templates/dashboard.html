@@ -20,7 +20,7 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <a class="nav-item nav-link active" href="/">Home</a>
+        <a class="nav-item nav-link" href="/">Home</a>
         <a class="nav-item nav-link active" href="/admin">Admin Dashboard <span class="sr-only">(current)</span></a>
         <a class="btn btn-danger" id="btnLogout" href="api/logout">Logout</a>
         <button class="btn btn-secondary" id="btnDelte" href="api/user/delete">Delete Account</button>
@@ -34,8 +34,17 @@
               <div class="bg-light rounded p-2">
                     <h3>Προσθηκη/Ενημέρωση ταινίας</h3>
                     <!--TODO Change to a form with all the fields-->
-                    <label for="movie">Παρακαλώ εισάγεται τα δεδομενα της ταινίας σε μορφη <span class="text-danger">JSON</span></br>Για να ενημερώσετε μια ταινία προσθέστε στο JSON προσθέστε μια τιμη <span class="text-warning">"current-title"</span> που ειναι ο τιτλος της ταινίας που θελετε να ενημερωσετε</label>
-                    <textarea class="form-control" name="movie" id="movie" rows="10"></textarea>
+                    <span class="mb-2">Εάν θέλετε να αλλάξετε τον τίτλο της ταινίας βάλτε στο πεδίο Νέος τίτλος ταινίας τον νέο τίτλο</span></br>
+                    <label for="title">Νέος τίτλος ταινίας <span class="text-danger">(ΜΟΝΟ για ενημέρωση)</span></label>
+                    <input class="form-control" type="text" id="mοtitle" name="mοtitle" value="">
+                    <label for="title">Τίτλος ταινίας</label>
+                    <input class="form-control" type="text" id="mtitle" name="mtitle" value="">
+                    <label for="title">Έτος κυκλοφορίας</label>
+                    <input class="form-control" type="text" id="myear" name="myear" value="">
+                    <label for="title">Πλοκή</label>
+                    <input class="form-control" type="text" id="mdesc" name="mdesc" value="">
+                    <label for="title">Πρωταγωνιστές</label>
+                    <input class="form-control" type="text" id="mactors" name="mactors" value="" placeholder='π.χ. "Chris Evans", "Channing Tatum", ...'>
                     <button class="btn btn-primary mt-2" id="btnMovieAdd">Προσθήκη</button>
                     <button class="btn btn-warning mt-2" id="btnMovieUpdate">Ενημέρωση</button>
               </div>
@@ -81,13 +90,48 @@
 $(function(){
     //Add movie
     $("#btnMovieAdd").click(function(){
-        var data = $('#movie').val()
-        console.log(data);
-        //var movie = JSON.parse(data);
-        //console.log(movie);
+        var data = '{';
+        var title = $('#mtitle').val();
+        var year = $('#myear').val();
+        var desc = $('#mdesc').val();
+        var actors = $('#mactors').val();
+        var first = true;
+        if(title != ''){
+            first = false;
+            data += '"title": "'+title+'"';
+        }
+        if(year != ''){
+            if(!first){
+                data +=',';
+            }
+            else{
+                first = false;
+            }
+            data += '"year": "'+year+'"';
+        }
+        if(desc != ''){
+            if(!first){
+                data +=',';
+            }
+            else{
+                first = false;
+            }
+            data += '"description": "'+desc+'"';
+        }
+        if(actors != ''){
+            if(!first){
+                data +=',';
+            }
+            else{
+                first = false;
+            }
+            data += '"actors": ['+actors+']';
+        }
+        data += '}';
+        var mydata = JSON.parse(data);
         $.ajax({
             url: "/api/admin/add_movie",
-            data: {data: data},
+            data: {data: JSON.stringify(mydata)},
             type: "POST",
             dataType: "json",       
             success:function(data, xhr){
@@ -101,11 +145,30 @@ $(function(){
     });
     //Update movie
     $("#btnMovieUpdate").click(function(){
-        var data = $('#movie').val()
+        var data = '{"current-title": "'+$('#mtitle').val()+'"';
+        var title = $('#mοtitle').val();
+        var year = $('#myear').val();
+        var desc = $('#mdesc').val();
+        var actors = $('#mactors').val();
+
+        if(title != ''){
+            data += ',"title": "'+title+'"';
+        }
+        if(year != ''){
+            data += ',"year": "'+year+'"';
+        }
+        if(desc != ''){
+            data += ',"description": "'+desc+'"';
+        }
+        if(actors != ''){
+            data += ',"actors": ['+actors+']';
+        }
+        data += '}';
         console.log(data);
+        var mydata = JSON.parse(data);
         $.ajax({
             url: "/api/admin/update_movie",
-            data: {data: data},
+            data: {data: JSON.stringify(mydata)},
             type: "UPDATE",
             dataType: "json",       
             success:function(data, xhr){
